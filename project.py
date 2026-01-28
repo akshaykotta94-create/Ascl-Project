@@ -181,6 +181,21 @@ LEGENDARY_WEAPONS = {
     "Death's Scythe": Weapon("Death's Scythe", WeaponType.SCYTHE, 65, Element.DARK, 0.35,
                             "The reaper's tool", "Legendary", None, 0, True,
                             "15% instant kill chance"),
+    "Worldbreaker": Weapon("Worldbreaker", WeaponType.HAMMER, 70, Element.PHYSICAL, 0.28,
+                          "Destroys all in its path", "Legendary", None, 0, True,
+                          "Ignores 50% of enemy defense"),
+    "Stormbringer": Weapon("Stormbringer", WeaponType.SWORD, 58, Element.LIGHTNING, 0.32,
+                          "Channels the storm's fury", "Legendary", None, 0, True,
+                          "Chain lightning to nearby enemies"),
+    "Shadowfang": Weapon("Shadowfang", WeaponType.DAGGER, 52, Element.DARK, 0.40,
+                        "Blade forged in darkness", "Legendary", None, 0, True,
+                        "25% chance to double attack"),
+    "Phoenix Bow": Weapon("Phoenix Bow", WeaponType.BOW, 54, Element.FIRE, 0.30,
+                         "Arrows of eternal flame", "Legendary", None, 0, True,
+                         "Resurrects user once per battle at 50% HP"),
+    "Eternal Staff": Weapon("Eternal Staff", WeaponType.STAFF, 62, Element.HOLY, 0.22,
+                           "Staff of infinite wisdom", "Legendary", None, 0, True,
+                           "All abilities have 50% reduced cooldown"),
 }
 
 WEAPONS = {
@@ -213,6 +228,11 @@ ARMOR_SETS = {
     "Leather Boots": Armor("Leather Boots", "boots", 1, 5, None, "Basic footwear", "Common"),
     "Iron Boots": Armor("Iron Boots", "boots", 4, 10, None, "Heavy metal boots", "Common"),
     "Lightning Treads": Armor("Lightning Treads", "boots", 8, 15, Element.LIGHTNING, "Swift as lightning", "Rare"),
+    # NEW ARMOR PIECES
+    "Titan's Crown": Armor("Titan's Crown", "head", 15, 40, Element.PHYSICAL, "Crown of ancient giants", "Legendary"),
+    "Void Cloak": Armor("Void Cloak", "chest", 18, 50, Element.DARK, "Absorbs dark energy", "Epic"),
+    "Storm Gauntlets": Armor("Storm Gauntlets", "hands", 7, 20, Element.LIGHTNING, "Crackling with power", "Rare"),
+    "Phoenix Mantle": Armor("Phoenix Mantle", "chest", 20, 60, Element.FIRE, "Born from flames", "Legendary"),
 }
 
 CONSUMABLES = {
@@ -222,7 +242,7 @@ CONSUMABLES = {
     "Strength Elixir": Consumable("Strength Elixir", "buff_damage", 10, "Increases damage by 10 for 3 turns", 3),
     "Defense Tonic": Consumable("Defense Tonic", "buff_defense", 5, "Increases defense by 5 for 3 turns", 3),
     "Speed Boost": Consumable("Speed Boost", "buff_speed", 1, "Reduces all cooldowns for 3 turns", 3),
-    "Phoenix Down": Consumable("Phoenix Down", "revive", 50, "Revives with 50% HP"),
+    "Phoenix Feather": Consumable("Phoenix Feather", "revive", 50, "Revives with 50% HP"),
 }
 
 MATERIALS = {
@@ -643,13 +663,13 @@ def sacrifice_system(player):
         player.hp -= 20
         player.active_buffs["damage_buff"] = 3
         player.sacrifices_made += 1
-        slowprint(" Sacrificed 20 HP! Damage increased!")
+        slowprint("💀 Sacrificed 20 HP! Damage increased!")
     elif choice == "2" and player.hp > 50:
         player.hp -= 50
         player.active_buffs["damage_buff"] = 5
         player.base_damage += 15
         player.sacrifices_made += 1
-        slowprint(" Sacrificed 50 HP! Massive damage boost!")
+        slowprint("💀 Sacrificed 50 HP! Massive damage boost!")
 
 def update_reputation(player, faction, amount):
     if faction not in player.reputation:
@@ -813,7 +833,7 @@ def dice_game(player):
         slowprint("Push! Bet returned.")
         player.gold += 10
     else:
-        slowprint(" You lose!")
+        slowprint("😢 You lose!")
 
 def card_flip(player):
     player.gold -= 20
@@ -827,9 +847,9 @@ def card_flip(player):
     if guess == actual:
         winnings = 80
         player.gold += winnings
-        slowprint(f" JACKPOT! Won {winnings} gold!")
+        slowprint(f"🎊 JACKPOT! Won {winnings} gold!")
     else:
-        slowprint(" Wrong suit!")
+        slowprint("❌ Wrong suit!")
 
 def slots(player):
     player.gold -= 50
@@ -844,17 +864,17 @@ def slots(player):
             slowprint(f"🎊 MEGA JACKPOT! Won {winnings} gold!")
         elif result[0] == "💎":
             winnings = 300
-            slowprint(f"💎= Diamond win! {winnings} gold!")
+            slowprint(f"💎 Diamond win! {winnings} gold!")
         else:
             winnings = 150
-            slowprint(f" Three of a kind! {winnings} gold!")
+            slowprint(f"🎉 Three of a kind! {winnings} gold!")
         player.gold += winnings
     elif result[0] == result[1] or result[1] == result[2]:
         winnings = 75
         player.gold += winnings
         slowprint(f"Two match! Won {winnings} gold!")
     else:
-        slowprint(" No match!")
+        slowprint("❌ No match!")
 
 def init_achievements(player):
     achievements = [
@@ -874,7 +894,7 @@ def check_achievements(player):
         if not ach.unlocked:
             if ach.requirement_type == "total_kills" and total_kills >= ach.requirement_value:
                 ach.unlocked = True
-                slowprint(f"\n ACHIEVEMENT UNLOCKED: {ach.name}!")
+                slowprint(f"\n🏆 ACHIEVEMENT UNLOCKED: {ach.name}!")
                 slowprint(f"   {ach.description}")
                 slowprint(f"   Reward: {ach.reward}")
                 if "gold" in ach.reward:
@@ -882,10 +902,10 @@ def check_achievements(player):
                     player.gold += amount
             elif ach.requirement_type == "bosses" and player.bosses_defeated >= ach.requirement_value:
                 ach.unlocked = True
-                slowprint(f"\n ACHIEVEMENT: {ach.name}!")
+                slowprint(f"\n🏆 ACHIEVEMENT: {ach.name}!")
             elif ach.requirement_type == "crits" and player.critical_hits >= ach.requirement_value:
                 ach.unlocked = True
-                slowprint(f"\n ACHIEVEMENT: {ach.name}!")
+                slowprint(f"\n🏆 ACHIEVEMENT: {ach.name}!")
 
 def bounty_board(player):
     if not player.bounties:
@@ -903,6 +923,9 @@ def init_bounties(player):
         Bounty("Goblin King", 200, "Medium", False),
         Bounty("Ancient Dragon", 500, "Hard", False),
         Bounty("Shadow Assassin", 300, "Medium", False),
+        Bounty("Void Lord", 600, "Hard", False),
+        Bounty("Frost Titan", 550, "Hard", False),
+        Bounty("Demon Prince", 700, "Extreme", False),
     ]
     player.bounties = bounties
 
@@ -911,7 +934,7 @@ def check_bounty_completion(player, enemy_name):
         if bounty.target == enemy_name and not bounty.completed:
             bounty.completed = True
             player.gold += bounty.reward
-            slowprint(f"\n BOUNTY COMPLETED! Earned {bounty.reward} gold!")
+            slowprint(f"\n💰 BOUNTY COMPLETED! Earned {bounty.reward} gold!")
 
 def talent_menu(player):
     while player.talent_points > 0:
@@ -938,7 +961,7 @@ def talent_menu(player):
 
 def talent_whirlwind(player, enemies):
     dmg = player.compute_damage()
-    slowprint("  WHIRLWIND STRIKE!")
+    slowprint("🌪️  WHIRLWIND STRIKE!")
     for enemy in enemies:
         if enemy['hp'] > 0:
             enemy['hp'] -= dmg
@@ -1009,18 +1032,12 @@ def battle(player, enemies, battle_count, weather):
             if enemy['hp'] > 0:
                 slowprint(f"  [{i}] {enemy['name']} HP:{enemy['hp']}/{enemy['max_hp']}")
 
-        for comp in player.active_companions:
-            if comp.hp > 0 and enemies:
-                alive_enemies = [e for e in enemies if e['hp'] > 0]
-                if alive_enemies:
-                    target = alive_enemies[0]
-                    dmg = comp.damage
-                    target['hp'] -= dmg
-                    slowprint(f" {comp.name} attacks {target['name']} for {dmg}!")
-
         slowprint("\n[1] Attack [2] Ability [3] Item [4] Stance")
         slowprint("[5] Companions [6] Ultimate [7] Sacrifice [8] Flee [0] Cheat")
         choice = input("> ").strip()
+
+        # Player must make a valid move before enemies attack
+        player_acted = False
 
         if choice == "0":
             code = input("Cheat code: ").strip()
@@ -1033,12 +1050,12 @@ def battle(player, enemies, battle_count, weather):
 
         if choice == "7":
             sacrifice_system(player)
-            continue
+            player_acted = True
 
         if choice == "6" and player.ultimate_charge >= player.ultimate_max:
             use_ultimate(player, enemies)
             player.ultimate_charge = 0
-            continue
+            player_acted = True
 
         alive_enemies = [e for e in enemies if e['hp'] > 0]
         if not alive_enemies:
@@ -1053,9 +1070,12 @@ def battle(player, enemies, battle_count, weather):
             target = alive_enemies[target_idx]
             dmg = player.compute_damage()
 
+            if player.cheat_flags.get("hihi", False):
+                dmg = 999999
+
             if check_critical_hit(player):
                 dmg = int(dmg * 2)
-                slowprint(" CRITICAL HIT!")
+                slowprint("💥 CRITICAL HIT!")
 
             element = player.weapon.element if player.weapon else Element.PHYSICAL
             dmg = apply_weather_effects(weather, dmg, element)
@@ -1064,64 +1084,99 @@ def battle(player, enemies, battle_count, weather):
             target['hp'] -= dmg
             player.total_damage_dealt += dmg
             player.ultimate_charge += 5
-            slowprint(f"  {dmg} damage to {target['name']}!")
+            slowprint(f"⚔️  {dmg} damage to {target['name']}!")
 
             if player.weapon and player.weapon.is_legendary:
                 if "Heals" in player.weapon.legendary_effect and target['hp'] <= 0:
                     heal_amt = int(player.compute_max_hp() * 0.1)
                     player.heal(heal_amt)
                     slowprint(f"   {player.weapon.name} heals {heal_amt} HP!")
+                elif "instant kill" in player.weapon.legendary_effect:
+                    if random.random() < 0.15:
+                        target['hp'] = 0
+                        slowprint(f"   💀 INSTANT KILL!")
+                elif "Ignores" in player.weapon.legendary_effect:
+                    slowprint(f"   🔨 Defense ignored!")
+
+            player_acted = True
 
         elif choice == "2":
             use_ability(player, alive_enemies)
+            player_acted = True
 
         elif choice == "3":
             use_item(player)
+            player_acted = True
+
+        # Companion attacks happen after player's turn
+        if player_acted:
+            for comp in player.active_companions:
+                if comp.hp > 0 and enemies:
+                    alive_enemies = [e for e in enemies if e['hp'] > 0]
+                    if alive_enemies:
+                        target = alive_enemies[0]
+                        dmg = comp.damage
+                        target['hp'] -= dmg
+                        slowprint(f"🤝 {comp.name} attacks {target['name']} for {dmg}!")
 
         if all(e['hp'] <= 0 for e in enemies):
             break
 
-        for enemy in enemies:
-            if enemy['hp'] > 0:
-                if enemy['stunned'] > 0:
-                    enemy['stunned'] -= 1
-                    slowprint(f" {enemy['name']} is stunned!")
-                    continue
+        # ENEMIES ONLY ATTACK IF PLAYER MADE A MOVE
+        if player_acted:
+            for enemy in enemies:
+                if enemy['hp'] > 0:
+                    if enemy['stunned'] > 0:
+                        enemy['stunned'] -= 1
+                        slowprint(f"😵 {enemy['name']} is stunned!")
+                        continue
 
-                if check_parry(player):
-                    slowprint(f"  PERFECT PARRY! Countered {enemy['name']}!")
-                    counter_dmg = player.compute_damage()
-                    enemy['hp'] -= counter_dmg
-                    slowprint(f"   Counter: {counter_dmg} damage!")
-                    continue
+                    # Check dodge flag
+                    if player.cheat_flags.get("dodge_next", False):
+                        slowprint(f"💨 Dodged {enemy['name']}'s attack!")
+                        player.cheat_flags["dodge_next"] = False
+                        continue
 
-                dmg = enemy.get('atk', 10)
-                dmg = max(0, dmg - player.compute_defense())
-                player.hp -= dmg
-                if dmg > 0:
-                    slowprint(f" {enemy['name']} hits for {dmg}!")
+                    if check_parry(player):
+                        slowprint(f"🛡️  PERFECT PARRY! Countered {enemy['name']}!")
+                        counter_dmg = player.compute_damage()
+                        enemy['hp'] -= counter_dmg
+                        slowprint(f"   ⚔️  Counter: {counter_dmg} damage!")
+                        continue
 
-        for enemy in enemies:
-            if enemy.get('poison', 0) > 0:
-                enemy['hp'] -= 5
-                enemy['poison'] -= 1
-                slowprint(f"  {enemy['name']} takes poison damage!")
-            if enemy.get('burning', 0) > 0:
-                enemy['hp'] -= 7
-                enemy['burning'] -= 1
-                slowprint(f" {enemy['name']} takes burn damage!")
+                    dmg = enemy.get('atk', 10)
+                    dmg = max(0, dmg - player.compute_defense())
+                    player.hp -= dmg
+                    if dmg > 0:
+                        slowprint(f"💢 {enemy['name']} hits for {dmg}!")
 
-        for key in player.cooldown_timers:
-            if player.cooldown_timers[key] > 0:
-                player.cooldown_timers[key] -= 1
+            # Apply status effects
+            for enemy in enemies:
+                if enemy.get('poison', 0) > 0:
+                    enemy['hp'] -= 5
+                    enemy['poison'] -= 1
+                    slowprint(f"  ☠️  {enemy['name']} takes poison damage!")
+                if enemy.get('burning', 0) > 0:
+                    enemy['hp'] -= 7
+                    enemy['burning'] -= 1
+                    slowprint(f"  🔥 {enemy['name']} takes burn damage!")
 
-        for buff in list(player.active_buffs.keys()):
-            player.active_buffs[buff] -= 1
-            if player.active_buffs[buff] <= 0:
-                del player.active_buffs[buff]
+            # Cooldowns only tick when player acts
+            if player.cheat_flags.get("haha", False):
+                for key in player.cooldown_timers:
+                    player.cooldown_timers[key] = 0
+            else:
+                for key in player.cooldown_timers:
+                    if player.cooldown_timers[key] > 0:
+                        player.cooldown_timers[key] -= 1
+
+            for buff in list(player.active_buffs.keys()):
+                player.active_buffs[buff] -= 1
+                if player.active_buffs[buff] <= 0:
+                    del player.active_buffs[buff]
 
     if player.hp > 0:
-        slowprint("\n VICTORY!")
+        slowprint("\n🎉 VICTORY!")
 
         total_gold = 0
         total_xp = 0
@@ -1129,9 +1184,12 @@ def battle(player, enemies, battle_count, weather):
         for enemy in enemies:
             player.kills[enemy['name']] = player.kills.get(enemy['name'], 0) + 1
 
-            gold = random.randint(20, 50) * (2 if enemy.get('boss') else 1)
+            gold = random.randint(20, 50) * (3 if enemy.get('boss') else 1)
             total_gold += gold
-            total_xp += 50 if enemy.get('boss') else 20
+            total_xp += 100 if enemy.get('boss') else 20
+
+            if enemy.get('boss'):
+                player.bosses_defeated += 1
 
             enemy_element = enemy.get('element', Element.PHYSICAL)
             capture_soul(player, enemy['name'], enemy_element)
@@ -1165,7 +1223,7 @@ def change_stance(player):
         player.stance = Stance.DEFENSIVE
     elif choice == "4":
         player.stance = Stance.COUNTER
-    slowprint(f"Stance: {player.stance.value}")
+    slowprint(f"⚔️  Stance: {player.stance.value}")
 
 def use_ultimate(player, enemies):
     slowprint("\n💫 ULTIMATE ATTACK!")
@@ -1336,7 +1394,13 @@ def main():
     bosses = [
         {"name": "Dragon", "hp": 200, "max_hp": 200, "atk": 25, "boss": True, "element": Element.FIRE,
          "weakness": Element.ICE, "resistance": Element.FIRE},
-        {"name": "Lich King", "hp": 180, "max_hp": 180, "atk": 22, "boss": True, "element": Element.DARK,
+        {"name": "Grim Reaper", "hp": 180, "max_hp": 180, "atk": 22, "boss": True, "element": Element.DARK,
+         "weakness": Element.HOLY, "resistance": Element.DARK},
+        {"name": "Frost Titan", "hp": 250, "max_hp": 250, "atk": 28, "boss": True, "element": Element.ICE,
+         "weakness": Element.FIRE, "resistance": Element.ICE},
+        {"name": "Void Lord", "hp": 220, "max_hp": 220, "atk": 30, "boss": True, "element": Element.DARK,
+         "weakness": Element.HOLY, "resistance": Element.PHYSICAL},
+        {"name": "Demon Prince", "hp": 300, "max_hp": 300, "atk": 35, "boss": True, "element": Element.FIRE,
          "weakness": Element.HOLY, "resistance": Element.DARK},
     ]
 
@@ -1352,8 +1416,9 @@ def main():
         slowprint("  5) Gambling Den")
         slowprint("  6) Bounty Board")
         slowprint("  7) Recruit Companion")
-        slowprint("  8) Cresthaven Tree")
+        slowprint("  8) Talent Tree")
         slowprint("  9) Hostel (Full heal)")
+        slowprint("  10) Stats")
         slowprint("╚═════════════════════╝")
 
         choice = input("> ").strip()
@@ -1383,6 +1448,18 @@ def main():
             player.hp = player.compute_max_hp()
             slowprint("💚 Fully healed!")
             continue
+        elif choice == "10":
+            slowprint(f"\n╔═══════ STATS ════════╗")
+            slowprint(f"  Level: {player.level}")
+            slowprint(f"  HP: {player.hp}/{player.compute_max_hp()}")
+            slowprint(f"  Damage: {player.compute_damage()}")
+            slowprint(f"  Defense: {player.compute_defense()}")
+            slowprint(f"  Gold: {player.gold}")
+            slowprint(f"  Kills: {sum(player.kills.values())}")
+            slowprint(f"  Bosses Defeated: {player.bosses_defeated}")
+            slowprint(f"╚══════════════════════╝")
+            input("Press Enter...")
+            continue
 
         if battle_count % 10 == 0:
             enemies = [dict(random.choice(bosses))]
@@ -1396,107 +1473,28 @@ def main():
             slowprint(f"Final Level: {player.level}")
             slowprint(f"Total Kills: {sum(player.kills.values())}")
             slowprint(f"Gold Earned: {player.gold}")
+            slowprint(f"Bosses Defeated: {player.bosses_defeated}")
             break
 
 if __name__ == "__main__":
     main()
-#HI
-#WYD
-#IM-BORED
-#NO THIS IS NOT AI
-# LOOKIN AT ARYA ARYA!!!!
-# YES YOU HELPED WITH LIKE 3 LINES A YEAR AGO
-#I MADE THIS
-#CREDIT GOES TO AKSHAY KOTTA
-# A.K.A THE TACO GOD :D
-# A.K.A THE PIZZA GOD :D
-# A.K.A POTATO MAN :D
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#HEHEHEHHEHEHEHHEHEHEH
-#1.5k lines including my horrendous laugh IYKYK
-
-
+    #HI ARYA
+    #HI ARYA
+    #HI ARYA
+    #HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
+#HI ARYA
