@@ -155,8 +155,8 @@ HYBRID_CLASSES = {
     },
     ("Mage", "Ranger"): {
         "name": "Arcane Archer",
-        "bonus_hp": 15,
-        "bonus_damage": 12,
+        "bonus_hp": -95,
+        "bonus_damage": 2000,
         "special": "Arrows explode with elemental magic"
     },
     ("Mage", "Druid"): {
@@ -2105,6 +2105,51 @@ def battle(player, enemies, battle_count, weather):
                     target['hp'] -= dmg
                     slowprint(f"🤝 {comp.name} attacks {target['name']} for {dmg}!")
 
+        # ── INITIATIVE ROLL ──────────────────────────────────────────────────
+        # 35% chance enemies ambush the player and attack BEFORE they can act.
+        # Bosses are more aggressive: 50% chance to go first.
+        initiative_threshold = 0.50 if is_boss else 0.35
+        enemy_goes_first = random.random() < initiative_threshold
+
+        if enemy_goes_first and any(e['hp'] > 0 for e in enemies):
+            slowprint(f"\n⚡ {'BOSS' if is_boss else 'Enemies'} strike first!")
+            for enemy in enemies:
+                if enemy['hp'] > 0 and player.hp > 0:
+                    if enemy['stunned'] > 0:
+                        enemy['stunned'] -= 1
+                        slowprint(f"😵 {enemy['name']} is stunned — can't act!")
+                        continue
+                    # Parry check still applies
+                    if check_parry(player) or 'perfect_parry' in player.active_buffs:
+                        slowprint(f"  🛡️ PERFECT PARRY! You counter {enemy['name']}!")
+                        counter_dmg = player.compute_damage()
+                        if 'perfect_parry' in player.active_buffs:
+                            counter_dmg = int(counter_dmg * 1.5)
+                        enemy['hp'] -= counter_dmg
+                        slowprint(f"   ⚔️ Counter strike: {counter_dmg} damage!")
+                        continue
+                    # Dodge check
+                    if player.cheat_flags.get("dodge_next"):
+                        player.cheat_flags["dodge_next"] = False
+                        slowprint(f"💨 You dodge {enemy['name']}'s early attack!")
+                        continue
+                    dmg = enemy.get('atk', 10)
+                    if enemy.get('cursed'):
+                        dmg = int(dmg * 0.7)
+                        slowprint("  🌑 Curse weakens the attack!")
+                    dmg = max(0, dmg - player.compute_defense())
+                    if player.cheat_flags.get("hehe", False):
+                        player.hp = 9999
+                    else:
+                        player.hp -= dmg
+                    if dmg > 0:
+                        slowprint(f"💢 {enemy['name']} hits you for {dmg}! (ambush)")
+            if player.hp <= 0:
+                break
+        else:
+            slowprint("\n✅ You have the initiative this turn!")
+        # ────────────────────────────────────────────────────────────────────
+
         slowprint("\n[1] Attack [2] Ability [3] Item [4] Stance")
         slowprint("[5] Companions [6] Ultimate [7] Sacrifice [8] Flee [0] Cheat")
         choice = input("> ").strip()
@@ -2233,34 +2278,35 @@ def battle(player, enemies, battle_count, weather):
         if all(e['hp'] <= 0 for e in enemies):
             break
 
-        # Enemy turn
-        for enemy in enemies:
-            if enemy['hp'] > 0:
-                if enemy['stunned'] > 0:
-                    enemy['stunned'] -= 1
-                    slowprint(f"😵 {enemy['name']} is stunned!")
-                    continue
+        # Enemy turn (only fires if enemies did NOT already go first this turn)
+        if not enemy_goes_first:
+            for enemy in enemies:
+                if enemy['hp'] > 0:
+                    if enemy['stunned'] > 0:
+                        enemy['stunned'] -= 1
+                        slowprint(f"😵 {enemy['name']} is stunned!")
+                        continue
 
-                if check_parry(player) or 'perfect_parry' in player.active_buffs:
-                    slowprint(f"  🛡️ PERFECT PARRY! Countered {enemy['name']}!")
-                    counter_dmg = player.compute_damage()
-                    if 'perfect_parry' in player.active_buffs:
-                        counter_dmg = int(counter_dmg * 1.5)
-                    enemy['hp'] -= counter_dmg
-                    slowprint(f"   ⚔️ Counter: {counter_dmg} damage!")
-                    continue
+                    if check_parry(player) or 'perfect_parry' in player.active_buffs:
+                        slowprint(f"  🛡️ PERFECT PARRY! Countered {enemy['name']}!")
+                        counter_dmg = player.compute_damage()
+                        if 'perfect_parry' in player.active_buffs:
+                            counter_dmg = int(counter_dmg * 1.5)
+                        enemy['hp'] -= counter_dmg
+                        slowprint(f"   ⚔️ Counter: {counter_dmg} damage!")
+                        continue
 
-                dmg = enemy.get('atk', 10)
+                    dmg = enemy.get('atk', 10)
 
-                # Hexblade curse effect
-                if enemy.get('cursed'):
-                    dmg = int(dmg * 0.7)
-                    slowprint("  🌑 Curse weakens attack!")
+                    # Hexblade curse effect
+                    if enemy.get('cursed'):
+                        dmg = int(dmg * 0.7)
+                        slowprint("  🌑 Curse weakens attack!")
 
-                dmg = max(0, dmg - player.compute_defense())
-                player.hp -= dmg
-                if dmg > 0:
-                    slowprint(f"💢 {enemy['name']} hits for {dmg}!")
+                    dmg = max(0, dmg - player.compute_defense())
+                    player.hp -= dmg
+                    if dmg > 0:
+                        slowprint(f"💢 {enemy['name']} hits for {dmg}!")
 
         # Status effects
         for enemy in enemies:
